@@ -1,34 +1,28 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BMP085_U.h>
-//#include <dht.h> // Biblioteca modificada para DHT11, disponível em https://github.com/RobTillaart/DHTNEW
-//#include <DHT.h>
-//#include <DHT_U.h>
+#include <Adafruit_BMP085.h>
 #include <GUVA-S12SD.h>
 
 
-//#define DHT11PIN 2
+
 
 int ledPin = 9;
 int indiceUV;
-Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085); // 10085 é o número de série do sensor BMP180, pode ser diferente para o seu sensor
 
-GUVAS12SD uv(12);
-float seaLevelPressure;
+Adafruit_BMP085_Unified bmp; // Crie um objeto BMP085
+
+GUVAS12SD uv; // Crie um objeto GUVA_S12SD
 
 void setup() {
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
-
- if (!bmp.begin()) {
-    Serial.println("Não foi possível encontrar o sensor BMP180. Verifique as conexões!");
-    while (1);
-  }
 }
 
 void loop() {
   
+
+  delay(500);
 
   float mV = uv.read();
   float uv_index = uv.index(mV);
@@ -61,17 +55,9 @@ void loop() {
 
   delay(500);
 
-  float temperature;
-  float pressure;
-  float altitude;
-
-  float initialPressure;
-  seaLevelPressure = bmp.seaLevelForAltitude(altitude, initialPressure);
-
-  bmp.getTemperature(&temperature);
-  bmp.getPressure(&pressure);
-
-  altitude = bmp.pressureToAltitude(seaLevelPressure, pressure);
+  float temperature = bmp.readTemperature();
+  float pressure = bmp.readPressure();
+  float altitude = bmp.readAltitude();
 
   Serial.print("Temperatura: ");
   Serial.print(temperature);
