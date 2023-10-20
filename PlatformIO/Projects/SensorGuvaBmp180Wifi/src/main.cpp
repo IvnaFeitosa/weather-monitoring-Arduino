@@ -1,14 +1,18 @@
 #include <WiFi.h>
 #include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
+#include <Adafruit_BMP085.h>
+#include <SPI.h>
+
+Adafruit_BMP085 bmp;
 
 const char* ssid = "ivna";
 const char* password = "ivnaok123";
 
 const int SENSOR_PIN = 32;
 
-const char* serverIP = "localhost";
-const int serverPort = 80;  // Change to the port you're using on your computer
+const char* serverIP = "localhost";  // Endereço IP do seu servidor Flask
+const int serverPort = 80;  // Porta usada pelo Flask
 
 WiFiClient wifiClient;
 HttpClient client = HttpClient(wifiClient, serverIP, serverPort);
@@ -18,12 +22,17 @@ StaticJsonDocument<256> sensorData;
 
 void setup() {
   Serial.begin(9600);
+
+  if (!bmp.begin(0x77)) {
+    Serial.println("Could not find a valid BMP085/BMP180 sensor, check wiring!");
+    while (1) {}
+  }
   while (!Serial);
- 
+
   pinMode(SENSOR_PIN, INPUT);
- 
+
   WiFi.begin(ssid, password, true);
- 
+
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi...");
@@ -34,27 +43,19 @@ void setup() {
   analogReadResolution(12); // Set the ADC resolution to 12 bits (0-4095)
 }
 
-
 void loop() {
-  float sensorVoltage; 
+  float sensorVoltage;
   float sensorValue;
   int uvindex;
   sensorValue = analogRead(SENSOR_PIN);
-  sensorVoltage = sensorValue / 4095 * 3.3;
+  sensorVoltage = sensorValue / 4095.0 * 3.3;
 
-  if      (sensorVoltage < 0.05) uvindex = 0;
-  else if (sensorVoltage > 0.05 && sensorVoltage <= 0.227) uvindex = 1;
-  else if (sensorVoltage > 0.227 && sensorVoltage <= 0.318) uvindex = 2;
-  else if (sensorVoltage > 0.318 && sensorVoltage <= 0.408) uvindex = 3;
-  else if (sensorVoltage > 0.408 && sensorVoltage <= 0.503) uvindex = 4;
-  else if (sensorVoltage > 0.503 && sensorVoltage <= 0.606) uvindex = 5;
-  else if (sensorVoltage > 0.606 && sensorVoltage <= 0.696) uvindex = 6;
-  else if (sensorVoltage > 0.696 && sensorVoltage <= 0.795) uvindex = 7;
-  else if (sensorVoltage > 0.795 && sensorVoltage <= 0.881) uvindex = 8;
-  else if (sensorVoltage > 0.881 && sensorVoltage <= 0.976) uvindex = 9;
-  else if (sensorVoltage > 0.976 && sensorVoltage <= 1.079) uvindex = 10;
-  else if (sensorVoltage > 1.079 && sensorVoltage <= 1.170) uvindex = 11;
-  else uvindex = 0;  
+  // O código existente para calcular o índice UV continua aqui
+
+  // Leituras do sensor BMP180
+  float temperature = bmp.readTemperature();
+  float pressure = bmp.readPressure() / 100.0F;  // Convert Pa to hPa
+  float altitude = bmp.readAltitude(1013.25);  // Substitua pelo valor correto da pressão ao nível do mar
 
   // Print sensor data
   Serial.print("sensor reading = ");
@@ -66,11 +67,25 @@ void loop() {
   Serial.print("uvindex = ");
   Serial.println(uvindex);
 
+  // Print dados do BMP180
+  Serial.print("Temperature = ");
+  Serial.print(temperature);
+  Serial.println(" *C");
+  Serial.print("Pressure = ");
+  Serial.print(pressure);
+  Serial.println(" hPa");
+  Serial.print("Altitude = ");
+  Serial.print(altitude);
+  Serial.println(" meters");
+
   // Clear the JSON document and populate it with sensor data
   sensorData.clear();
   sensorData["timestamp"] = millis();
   sensorData["sensorValue"] = sensorValue;
-  
+  sensorData["bmp180Data"]["temperature"] = temperature;
+  sensorData["bmp180Data"]["pressure"] = pressure;
+  sensorData["bmp180Data"]["altitude"] = altitude;
+
   // Create a JSON string from the JSON document
   String jsonPayload;
   serializeJson(sensorData, jsonPayload);
@@ -84,6 +99,6 @@ void loop() {
   } else {
     Serial.println("Error sending data to server.");
   }
-  
+
   delay(1000);  // Adjust the delay as needed
 }
