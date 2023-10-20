@@ -17,14 +17,14 @@ const int serverPort = 80;  // Porta usada pelo Flask
 WiFiClient wifiClient;
 HttpClient client = HttpClient(wifiClient, serverIP, serverPort);
 
-// Create a JSON document to store sensor data
+// Cria um arquivo em JSOM para armazenar os dados do sensor 
 StaticJsonDocument<256> sensorData;
 
 void setup() {
   Serial.begin(9600);
 
   if (!bmp.begin(0x77)) {
-    Serial.println("Could not find a valid BMP085/BMP180 sensor, check wiring!");
+    Serial.println("Não foi possivel estabelecer a conexão com o sensor BMO180");
     while (1) {}
   }
   while (!Serial);
@@ -35,12 +35,12 @@ void setup() {
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting to WiFi...");
+    Serial.println("Conectando ao WiFi...");
   }
 
-  Serial.println("Connected to WiFi");
+  Serial.println("Conectado com o WiFi");
 
-  analogReadResolution(12); // Set the ADC resolution to 12 bits (0-4095)
+  analogReadResolution(12); // Define a resolução ADC para 12 bits 
 }
 
 void loop() {
@@ -50,35 +50,33 @@ void loop() {
   sensorValue = analogRead(SENSOR_PIN);
   sensorVoltage = sensorValue / 4095.0 * 3.3;
 
-  // O código existente para calcular o índice UV continua aqui
-
   // Leituras do sensor BMP180
   float temperature = bmp.readTemperature();
-  float pressure = bmp.readPressure() / 100.0F;  // Convert Pa to hPa
-  float altitude = bmp.readAltitude(1013.25);  // Substitua pelo valor correto da pressão ao nível do mar
+  float pressure = bmp.readPressure() / 100.0F;  // convertendo para hPa
+  float altitude = bmp.readAltitude(1013.25);  // pressão ao nível do mar em hPa
 
-  // Print sensor data
-  Serial.print("sensor reading = ");
+  // Imprimindo informações do sensor
+  Serial.print("Leitura do sensor = ");
   Serial.print(sensorValue);
-  Serial.println(" ADC units");
-  Serial.print("sensor voltage = ");
+  Serial.println(" ADC unidades");
+  Serial.print("Voltagem do sensor = ");
   Serial.print(sensorVoltage);
-  Serial.println(" V");
-  Serial.print("uvindex = ");
+  Serial.println("V");
+  Serial.print("Raio UV = ");
   Serial.println(uvindex);
 
-  // Print dados do BMP180
-  Serial.print("Temperature = ");
+  // Imprimindo informações do sensor BMP180
+  Serial.print("Temperatura = ");
   Serial.print(temperature);
-  Serial.println(" *C");
-  Serial.print("Pressure = ");
+  Serial.println(" ºC");
+  Serial.print("Pressão = ");
   Serial.print(pressure);
   Serial.println(" hPa");
   Serial.print("Altitude = ");
   Serial.print(altitude);
-  Serial.println(" meters");
+  Serial.println(" m");
 
-  // Clear the JSON document and populate it with sensor data
+  // Lipa ao informações do aquivo json e insere as atuais
   sensorData.clear();
   sensorData["timestamp"] = millis();
   sensorData["sensorValue"] = sensorValue;
@@ -86,19 +84,19 @@ void loop() {
   sensorData["bmp180Data"]["pressure"] = pressure;
   sensorData["bmp180Data"]["altitude"] = altitude;
 
-  // Create a JSON string from the JSON document
+  // Cria uma string json a partir do documento em json
   String jsonPayload;
   serializeJson(sensorData, jsonPayload);
 
-  // Send data to the server
+  // enviando informações para o servidor
   int responseCode = client.post("/sensor_data", "application/json", jsonPayload);
 
   if (responseCode > 0) {
-    Serial.print("Server response code: ");
+    Serial.print("Código de retor no do servidor ");
     Serial.println(responseCode);
   } else {
-    Serial.println("Error sending data to server.");
+    Serial.println("Erro ao enviar informações para o sensor");
   }
 
-  delay(1000);  // Adjust the delay as needed
+  delay(1000);  
 }
