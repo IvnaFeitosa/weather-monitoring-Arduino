@@ -50,20 +50,38 @@ void loop() {
   sensorValue = analogRead(SENSOR_PIN);
   sensorVoltage = sensorValue / 4095.0 * 3.3;
 
+  if      (sensorVoltage < 0.05) uvindex = 0;
+  else if (sensorVoltage > 0.05 && sensorVoltage <= 0.227) uvindex = 1;
+  else if (sensorVoltage > 0.227 && sensorVoltage <= 0.318) uvindex = 2;
+  else if (sensorVoltage > 0.318 && sensorVoltage <= 0.408) uvindex = 3;
+  else if (sensorVoltage > 0.408 && sensorVoltage <= 0.503) uvindex = 4;
+  else if (sensorVoltage > 0.503 && sensorVoltage <= 0.606) uvindex = 5;
+  else if (sensorVoltage > 0.606 && sensorVoltage <= 0.696) uvindex = 6;
+  else if (sensorVoltage > 0.696 && sensorVoltage <= 0.795) uvindex = 7;
+  else if (sensorVoltage > 0.795 && sensorVoltage <= 0.881) uvindex = 8;
+  else if (sensorVoltage > 0.881 && sensorVoltage <= 0.976) uvindex = 9;
+  else if (sensorVoltage > 0.976 && sensorVoltage <= 1.079) uvindex = 10;
+  else if (sensorVoltage > 1.079 && sensorVoltage <= 1.170) uvindex = 11;
+  else uvindex = 0;
+
   // Leituras do sensor BMP180
   float temperature = bmp.readTemperature();
   float pressure = bmp.readPressure() / 100.0F;  // convertendo para hPa
   float altitude = bmp.readAltitude(1013.25);  // pressão ao nível do mar em hPa
 
+
+
   // Imprimindo informações do sensor
-  Serial.print("Leitura do sensor = ");
-  Serial.print(sensorValue);
-  Serial.println(" ADC unidades");
-  Serial.print("Voltagem do sensor = ");
-  Serial.print(sensorVoltage);
-  Serial.println("V");
+  //Serial.print("Leitura do sensor = ");
+  //Serial.print(sensorValue);
+  //Serial.println(" ADC unidades");
+  //Serial.print("Voltagem do sensor = ");
+  //Serial.print(sensorVoltage);
+  //Serial.println("V");
   Serial.print("Raio UV = ");
   Serial.println(uvindex);
+
+
 
   // Imprimindo informações do sensor BMP180
   Serial.print("Temperatura = ");
@@ -95,7 +113,7 @@ void loop() {
     Serial.print("Código de retor no do servidor ");
     Serial.println(responseCode);
   } else {
-    Serial.println("Erro ao enviar informações para o sensor");
+    Serial.println("Erro ao estabelecer conexão com o servidor");
   }
 
   delay(1000);  

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-const int SENSOR_PIN = 32;
+const int SENSOR_PIN = 34;
 
 
 void setup() {
