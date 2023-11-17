@@ -11,7 +11,7 @@ const char* password = "ivnaok123";
 
 const int SENSOR_PIN = 32;
 
-const char* serverIP = "localhost";  // Endereço IP do seu servidor Flask
+const char* serverIP = "192.168.0.8";  // Endereço IP do seu servidor Flask
 const int serverPort = 80;  // Porta usada pelo Flask
 
 WiFiClient wifiClient;

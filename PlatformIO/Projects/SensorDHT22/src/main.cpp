@@ -29,6 +29,7 @@ String SendHTML(float Temperaturestat,float Humiditystat){
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   ptr +="<title>Boletim meteorológico ESP32</title>\n";
+
   ptr +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
   ptr +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;}\n";
   ptr +="p {font-size: 24px;color: #444444;margin-bottom: 10px;}\n";
@@ -88,7 +89,7 @@ void setup() {
   Serial.print("IP obtido: ");  
   Serial.println(WiFi.localIP());
 
-  server.on("/", handle_OnConnect);
+  
   server.onNotFound(handle_NotFound);
 
   server.begin();
@@ -97,6 +98,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  
 }
 
 

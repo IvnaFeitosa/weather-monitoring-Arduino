@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../../workspace/Bolsa-arduino/weather-monitoring-Arduino/PlatformIO/Projects/apenasAM2302"
+		},
+		{
+			"name": "am2302",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
